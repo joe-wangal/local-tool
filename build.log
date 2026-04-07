@@ -1,0 +1,13 @@
+
+> personal-tools-site@0.0.0 build
+> tsc -b && vite build
+
+vite v6.4.1 building for production...
+transforming...
+✓ 39 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.54 kB │ gzip:  0.36 kB
+dist/assets/index-l0yJiGc7.css    8.38 kB │ gzip:  2.44 kB
+dist/assets/index-1Mpewvk6.js   195.36 kB │ gzip: 64.27 kB
+✓ built in 316ms
