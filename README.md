@@ -1,20 +1,20 @@
-# 个人工具站
+# Personal Tools Site
 
-一个基于 Vite + React + TypeScript 的个人工具网站，提供以下能力：
+A personal tools website built with Vite + React + TypeScript, providing the following features:
 
-- 实时时间戳展示
-- SQL 格式化
-- JSON 格式化
-- 文本对比
+- Live timestamp display
+- SQL formatting
+- JSON formatting
+- Text diff
 
-## 开发
+## Development
 
 ```bash
 npm install
 npm run dev
 ```
 
-## 构建
+## Build
 
 ```bash
 npm run build

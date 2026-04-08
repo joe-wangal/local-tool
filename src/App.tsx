@@ -43,15 +43,15 @@ const sampleLeft = `Alpha\nBeta\nGamma\nDelta`;
 const sampleRight = `Alpha\nBeta\nGamma updated\nEpsilon\nDelta`;
 
 const navItems = [
-  { to: '/timestamp', label: '时间戳' },
+  { to: '/timestamp', label: 'Timestamp' },
   { to: '/sql', label: 'SQL' },
   { to: '/json', label: 'JSON' },
-  { to: '/diff', label: '文本对比' },
+  { to: '/diff', label: 'Text Diff' },
 ];
 
 function formatTimestamp(date: Date) {
   return {
-    local: date.toLocaleString('zh-CN', { hour12: false }),
+    local: date.toLocaleString('en-US', { hour12: false }),
     iso: date.toISOString(),
     unix: Math.floor(date.getTime() / 1000).toString(),
     unixMs: date.getTime().toString(),
@@ -288,8 +288,8 @@ function tryFormatInvalidJson(input: string) {
 }
 
 function getJsonErrorInfo(error: unknown, input: string): JsonErrorInfo {
-  const message = error instanceof Error ? error.message : '未知错误';
-  const match = message.match(/position\s+(\d+)/i) ?? message.match(/位置\s*(\d+)/);
+  const message = error instanceof Error ? error.message : 'Unknown error';
+  const match = message.match(/position\s+(\d+)/i);
   const inferredIndex = findLikelyJsonErrorIndex(input);
   if (!match) {
     if (inferredIndex !== null) {
@@ -430,7 +430,7 @@ function renderJsonTokens(tokens: Token[], errorIndex: number | null, totalLengt
 
       nodes.push(
         <span key={`json-marker-${i}`} className="json-error-inline-marker">
-          {'\n▲ 错误位置\n'}
+          {'\n▲ Error location\n'}
         </span>,
       );
 
@@ -467,7 +467,7 @@ function renderJsonTokens(tokens: Token[], errorIndex: number | null, totalLengt
   if (errorIndex !== null && !markerInserted && errorIndex >= totalLength) {
     nodes.push(
       <span key="json-marker-end" className="json-error-inline-marker">
-        {'\n▲ 错误位置（结尾）'}
+        {'\n▲ Error location (end)'}
       </span>,
     );
   }
@@ -634,10 +634,10 @@ export default function App() {
   const [now, setNow] = useState(() => new Date());
   const [sqlInput, setSqlInput] = useState(sampleSql);
   const [sqlOutput, setSqlOutput] = useState('');
-  const [sqlMessage, setSqlMessage] = useState('点击格式化按钮整理 SQL。');
+  const [sqlMessage, setSqlMessage] = useState('Click Format SQL to organize the query.');
   const [jsonInput, setJsonInput] = useState(sampleJson);
   const [jsonOutput, setJsonOutput] = useState('');
-  const [jsonMessage, setJsonMessage] = useState('支持 JSON 美化与压缩前的快速校验。');
+  const [jsonMessage, setJsonMessage] = useState('Validate JSON quickly before prettifying or compressing it.');
   const [jsonErrorInfo, setJsonErrorInfo] = useState<JsonErrorInfo | null>(null);
   const [leftText, setLeftText] = useState(sampleLeft);
   const [rightText, setRightText] = useState(sampleRight);
@@ -669,10 +669,10 @@ export default function App() {
     try {
       const formatted = formatSql(sqlInput);
       setSqlOutput(formatted);
-      setSqlMessage(formatted ? 'SQL 已重新排版。' : '输入为空。');
+      setSqlMessage(formatted ? 'SQL has been reformatted.' : 'Input is empty.');
     } catch {
       setSqlOutput('');
-      setSqlMessage('暂不支持该 SQL 片段的自动格式化。');
+      setSqlMessage('Automatic formatting is not supported for this SQL snippet yet.');
     }
   };
 
@@ -681,14 +681,14 @@ export default function App() {
       const formatted = formatJson(jsonInput);
       setJsonOutput(formatted);
       setJsonErrorInfo(null);
-      setJsonMessage('JSON 已验证并美化。');
+      setJsonMessage('JSON has been validated and prettified.');
     } catch (error) {
       const rough = tryFormatInvalidJson(jsonInput);
       const info = getJsonErrorInfo(error, jsonInput);
       const formattedIndex = info.index !== null ? (rough.indexMap[info.index] ?? rough.formatted.length) : null;
       setJsonOutput(rough.formatted || jsonInput);
       setJsonErrorInfo({ ...info, formattedIndex });
-      setJsonMessage(`JSON 格式错误：${info.message}（已尝试格式化并标记）`);
+      setJsonMessage(`JSON format error: ${info.message} (formatting and highlighting were attempted)`);
     }
   };
 
@@ -697,30 +697,30 @@ export default function App() {
       const compressed = compressJson(jsonInput);
       setJsonOutput(compressed);
       setJsonErrorInfo(null);
-      setJsonMessage('JSON 已压缩为单行。');
+      setJsonMessage('JSON has been compressed into a single line.');
     } catch (error) {
       const rough = tryFormatInvalidJson(jsonInput);
       const info = getJsonErrorInfo(error, jsonInput);
       const formattedIndex = info.index !== null ? (rough.indexMap[info.index] ?? rough.formatted.length) : null;
       setJsonOutput(rough.formatted || jsonInput);
       setJsonErrorInfo({ ...info, formattedIndex });
-      setJsonMessage(`JSON 格式错误：${info.message}（已尝试格式化并标记）`);
+      setJsonMessage(`JSON format error: ${info.message} (formatting and highlighting were attempted)`);
     }
   };
 
   const handleCopy = async (text: string, label: string) => {
     await copyText(text);
     if (label === 'SQL') {
-      setSqlMessage('SQL 已复制到剪贴板。');
+      setSqlMessage('SQL copied to clipboard.');
       return;
     }
 
     if (label === 'JSON') {
-      setJsonMessage('JSON 已复制到剪贴板。');
+      setJsonMessage('JSON copied to clipboard.');
       return;
     }
 
-    setCopyMessage(`${label} 已复制到剪贴板。`);
+    setCopyMessage(`${label} copied to clipboard.`);
   };
 
   const handleJumpNextDiff = () => {
@@ -747,7 +747,7 @@ export default function App() {
         <div className="background-orb background-orb--one" />
         <div className="background-orb background-orb--two" />
 
-        <nav className="top-nav" aria-label="工具导航">
+        <nav className="top-nav" aria-label="Tool navigation">
           <div className="top-nav__links">
             {navItems.map((item) => (
               <NavLink
@@ -760,7 +760,7 @@ export default function App() {
             ))}
           </div>
           <button type="button" className="theme-switch" onClick={() => setTheme(theme === 'night' ? 'day' : 'night')}>
-            {theme === 'night' ? '切换浅色' : '切换深色'}
+            {theme === 'night' ? 'Switch to light theme' : 'Switch to dark theme'}
           </button>
         </nav>
 
@@ -771,43 +771,43 @@ export default function App() {
               element={(
                 <section className="timestamp-panel">
                   <div>
-                    <div className="section-label">时间戳</div>
-                    <p>适合截图、日志和分享时快速取值。</p>
+                    <div className="section-label">Timestamp</div>
+                    <p>Useful for quickly grabbing values for screenshots, logs, and sharing.</p>
                     <div className="timestamp-list">
                       <div className="timestamp-item">
                         <div>
-                          <div className="timestamp-item__label">本地时间</div>
+                          <div className="timestamp-item__label">Local time</div>
                           <div className="timestamp-item__value">{formattedTimestamp.local}</div>
                         </div>
-                        <button className="chip" type="button" onClick={() => handleCopy(formattedTimestamp.local, '时间戳')}>
-                          复制本地时间
+                        <button className="chip" type="button" onClick={() => handleCopy(formattedTimestamp.local, 'Timestamp')}>
+                          Copy local time
                         </button>
                       </div>
                       <div className="timestamp-item">
                         <div>
-                          <div className="timestamp-item__label">ISO 时间</div>
+                          <div className="timestamp-item__label">ISO time</div>
                           <div className="timestamp-item__value">{formattedTimestamp.iso}</div>
                         </div>
-                        <button className="chip" type="button" onClick={() => handleCopy(formattedTimestamp.iso, '时间戳')}>
-                          复制 ISO 时间
+                        <button className="chip" type="button" onClick={() => handleCopy(formattedTimestamp.iso, 'Timestamp')}>
+                          Copy ISO time
                         </button>
                       </div>
                       <div className="timestamp-item">
                         <div>
-                          <div className="timestamp-item__label">Unix 秒</div>
+                          <div className="timestamp-item__label">Unix seconds</div>
                           <div className="timestamp-item__value">{formattedTimestamp.unix}</div>
                         </div>
-                        <button className="chip" type="button" onClick={() => handleCopy(formattedTimestamp.unix, '时间戳')}>
-                          复制 Unix 秒
+                        <button className="chip" type="button" onClick={() => handleCopy(formattedTimestamp.unix, 'Timestamp')}>
+                          Copy Unix seconds
                         </button>
                       </div>
                       <div className="timestamp-item">
                         <div>
-                          <div className="timestamp-item__label">Unix 毫秒</div>
+                          <div className="timestamp-item__label">Unix milliseconds</div>
                           <div className="timestamp-item__value">{formattedTimestamp.unixMs}</div>
                         </div>
-                        <button className="chip" type="button" onClick={() => handleCopy(formattedTimestamp.unixMs, '时间戳')}>
-                          复制 Unix 毫秒
+                        <button className="chip" type="button" onClick={() => handleCopy(formattedTimestamp.unixMs, 'Timestamp')}>
+                          Copy Unix milliseconds
                         </button>
                       </div>
                     </div>
@@ -819,19 +819,19 @@ export default function App() {
             <Route
               path="/sql"
               element={(
-                <ToolCard title="SQL 格式化" description="自动整理常见查询语句的层级和关键字。">
+                <ToolCard title="SQL Formatter" description="Automatically organizes the structure and keywords of common queries.">
                   <textarea value={sqlInput} onChange={(event) => setSqlInput(event.target.value)} spellCheck={false} />
                   <div className="tool-actions">
-                    <button type="button" onClick={handleSqlFormat}>格式化 SQL</button>
-                    <button type="button" className="ghost" onClick={() => handleCopy(sqlOutput || sqlInput, 'SQL')}>复制结果</button>
+                    <button type="button" onClick={handleSqlFormat}>Format SQL</button>
+                    <button type="button" className="ghost" onClick={() => handleCopy(sqlOutput || sqlInput, 'SQL')}>Copy result</button>
                   </div>
                   <p className="tool-message">{sqlMessage}</p>
-                  <pre className="code-output" aria-label="SQL 语法高亮结果">
+                  <pre className="code-output" aria-label="SQL syntax highlight result">
                     {sqlOutput ? sqlTokens.map((token, index) => (
                       <span key={`${token.type}-${index}`} className={`token ${token.type}`}>
                         {token.text}
                       </span>
-                    )) : '格式化结果会显示在这里。'}
+                    )) : 'Formatted output will appear here.'}
                   </pre>
                 </ToolCard>
               )}
@@ -839,22 +839,22 @@ export default function App() {
             <Route
               path="/json"
               element={(
-                <ToolCard title="JSON 格式化" description="美化 JSON、快速校验并保留可复制输出。">
+                <ToolCard title="JSON Formatter" description="Prettify JSON, validate it quickly, and keep a copyable output.">
                   <textarea value={jsonInput} onChange={(event) => setJsonInput(event.target.value)} spellCheck={false} />
                   <div className="tool-actions">
-                    <button type="button" onClick={handleJsonFormat}>格式化 JSON</button>
-                    <button type="button" onClick={handleJsonCompress}>压缩 JSON</button>
-                    <button type="button" className="ghost" onClick={() => handleCopy(jsonOutput || jsonInput, 'JSON')}>复制结果</button>
+                    <button type="button" onClick={handleJsonFormat}>Format JSON</button>
+                    <button type="button" onClick={handleJsonCompress}>Compress JSON</button>
+                    <button type="button" className="ghost" onClick={() => handleCopy(jsonOutput || jsonInput, 'JSON')}>Copy result</button>
                   </div>
                   <p className="tool-message">{jsonMessage}</p>
-                  <pre className="code-output" aria-label="JSON 语法高亮结果">
+                  <pre className="code-output" aria-label="JSON syntax highlight result">
                     {jsonDisplayText
                       ? renderJsonTokens(
                         jsonTokens,
                         jsonErrorInfo?.formattedIndex ?? jsonErrorInfo?.index ?? null,
                         jsonDisplayText.length,
                       )
-                      : 'JSON 格式化结果会显示在这里。'}
+                      : 'Formatted JSON output will appear here.'}
                   </pre>
                 </ToolCard>
               )}
@@ -865,24 +865,24 @@ export default function App() {
                 <section className="diff-panel">
                   <div className="tool-card__header">
                     <div>
-                      <h2>文本对比</h2>
-                      <p>按行配对后继续逐词对比，直观看到哪一个词发生改动。</p>
+                      <h2>Text Diff</h2>
+                      <p>Pair lines first, then compare word by word to see exactly what changed.</p>
                     </div>
                     <button type="button" className="chip" onClick={handleJumpNextDiff}>
-                      下一个差异
+                      Next difference
                     </button>
                   </div>
                   <div className="diff-editors">
                     <textarea value={leftText} onChange={(event) => setLeftText(event.target.value)} spellCheck={false} />
                     <textarea value={rightText} onChange={(event) => setRightText(event.target.value)} spellCheck={false} />
                   </div>
-                  <div className="diff-output" aria-label="逐词文本对比结果">
+                  <div className="diff-output" aria-label="Word-by-word text diff result">
                     <div className={`diff-status ${isDiffMatched ? 'diff-status--match' : 'diff-status--mismatch'}`}>
-                      {isDiffMatched ? '对比结果：一致' : `对比结果：不一致（共 ${diffRowIndexes.length} 处差异）`}
+                      {isDiffMatched ? 'Match result: identical' : `Match result: different (${diffRowIndexes.length} differences total)`}
                     </div>
                     <div className="diff-head">
-                      <span>原文</span>
-                      <span>新版</span>
+                      <span>Original</span>
+                      <span>New</span>
                     </div>
                     {diffRows.map((row, index) => (
                       <div
