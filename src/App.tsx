@@ -37,6 +37,15 @@ type JsonErrorInfo = {
   lineText: string;
 };
 
+type JsonTreeNodeKey = string | number;
+
+type JsonTreeNode = {
+  key: JsonTreeNodeKey;
+  value: unknown;
+  type: 'object' | 'array' | 'string' | 'number' | 'boolean' | 'null';
+  children?: JsonTreeNode[];
+};
+
 const sampleSql = `select id, name, created_at from users where status = 'active' and deleted_at is null order by created_at desc;`;
 const sampleJson = '{"name":"Ministrybrands","features":["timestamp","sql formatter","json formatter","text compare"],"enabled":true}';
 const sampleLeft = `Alpha\nBeta\nGamma\nDelta`;
@@ -402,6 +411,133 @@ function highlightJson(input: string) {
     }
     return 'json-punctuation';
   });
+}
+
+function buildJsonTree(value: unknown, key: JsonTreeNodeKey = ''): JsonTreeNode {
+  if (value === null) {
+    return { key, value, type: 'null' };
+  }
+
+  if (typeof value === 'boolean') {
+    return { key, value, type: 'boolean' };
+  }
+
+  if (typeof value === 'number') {
+    return { key, value, type: 'number' };
+  }
+
+  if (typeof value === 'string') {
+    return { key, value, type: 'string' };
+  }
+
+  if (Array.isArray(value)) {
+    return {
+      key,
+      value,
+      type: 'array',
+      children: value.map((item, index) => buildJsonTree(item, index)),
+    };
+  }
+
+  if (typeof value === 'object') {
+    return {
+      key,
+      value,
+      type: 'object',
+      children: Object.entries(value).map(([k, v]) => buildJsonTree(v, k)),
+    };
+  }
+
+  return { key, value, type: 'string' };
+}
+
+function JsonTreeNode({ node, depth = 0 }: { node: JsonTreeNode; depth?: number }) {
+  const [expanded, setExpanded] = useState(true);
+  const hasChildren = node.children && node.children.length > 0;
+  const isCompact = !hasChildren;
+
+  const renderValue = () => {
+    switch (node.type) {
+      case 'string':
+        return `"${node.value}"`;
+      case 'number':
+        return String(node.value);
+      case 'boolean':
+        return String(node.value);
+      case 'null':
+        return 'null';
+      default:
+        return '';
+    }
+  };
+
+  const renderKey = () => {
+    if (typeof node.key === 'number') {
+      return `[${node.key}]`;
+    }
+    return `"${node.key}"`;
+  };
+
+  if (isCompact) {
+    return (
+      <div className="json-tree-node json-tree-node--compact" style={{ paddingLeft: `${depth * 16}px` }}>
+        {node.key !== '' && (
+          <>
+            <span className="json-key">{renderKey()}</span>
+            <span className="json-colon">: </span>
+          </>
+        )}
+        <span className={`json-value json-${node.type}`}>{renderValue()}</span>
+      </div>
+    );
+  }
+
+  const isArray = node.type === 'array';
+  const bracket = isArray ? '[' : '{';
+  const closeBracket = isArray ? ']' : '}';
+
+  return (
+    <div className="json-tree-node" style={{ paddingLeft: `${depth * 16}px` }}>
+      <div className="json-tree-node__header">
+        <button
+          type="button"
+          className={`json-tree-toggle ${expanded ? 'json-tree-toggle--expanded' : ''}`}
+          onClick={() => setExpanded(!expanded)}
+          aria-expanded={expanded}
+        >
+          {expanded ? '▼' : '▶'}
+        </button>
+        {node.key !== '' && (
+          <>
+            <span className="json-key">{renderKey()}</span>
+            <span className="json-colon">: </span>
+          </>
+        )}
+        <span className="json-bracket">{bracket}</span>
+        {!expanded && (
+          <>
+            <span className="json-collapsed-indicator">…</span>
+            <span className="json-bracket">{closeBracket}</span>
+          </>
+        )}
+      </div>
+      {expanded && (
+        <div className="json-tree-node__children">
+          {node.children?.map((child, index) => (
+            <div key={`${child.key}-${index}`} className="json-tree-child">
+              <JsonTreeNode node={child} depth={depth + 1} />
+              {index < (node.children?.length ?? 0) - 1 && <span className="json-comma">,</span>}
+            </div>
+          ))}
+        </div>
+      )}
+      {expanded && (
+        <div style={{ paddingLeft: `${depth * 16}px` }} className="json-tree-node__close">
+          <span className="json-bracket">{closeBracket}</span>
+        </div>
+      )}
+    </div>
+  );
 }
 
 function renderJsonTokens(tokens: Token[], errorIndex: number | null, totalLength: number) {
@@ -847,15 +983,31 @@ export default function App() {
                     <button type="button" className="ghost" onClick={() => handleCopy(jsonOutput || jsonInput, 'JSON')}>Copy result</button>
                   </div>
                   <p className="tool-message">{jsonMessage}</p>
-                  <pre className="code-output" aria-label="JSON syntax highlight result">
-                    {jsonDisplayText
-                      ? renderJsonTokens(
-                        jsonTokens,
-                        jsonErrorInfo?.formattedIndex ?? jsonErrorInfo?.index ?? null,
-                        jsonDisplayText.length,
-                      )
-                      : 'Formatted JSON output will appear here.'}
-                  </pre>
+                  {jsonOutput ? (
+                    <div className="json-tree-output" aria-label="JSON tree view">
+                      {(() => {
+                        try {
+                          const parsed = JSON.parse(jsonOutput);
+                          const tree = buildJsonTree(parsed);
+                          return <JsonTreeNode node={tree} />;
+                        } catch {
+                          return (
+                            <pre className="code-output" aria-label="JSON syntax highlight result">
+                              {renderJsonTokens(
+                                jsonTokens,
+                                jsonErrorInfo?.formattedIndex ?? jsonErrorInfo?.index ?? null,
+                                jsonDisplayText.length,
+                              )}
+                            </pre>
+                          );
+                        }
+                      })()}
+                    </div>
+                  ) : (
+                    <pre className="code-output" aria-label="JSON syntax highlight result">
+                      Formatted JSON output will appear here.
+                    </pre>
+                  )}
                 </ToolCard>
               )}
             />

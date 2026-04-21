@@ -349,6 +349,120 @@ textarea:focus {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
 }
 
+.json-tree-output {
+  min-height: 120px;
+  margin: 0;
+  padding: 16px;
+  border-radius: 18px;
+  overflow: auto;
+  background: var(--code-bg);
+  border: 1px solid color-mix(in srgb, var(--border), transparent 35%);
+  color: var(--code-text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.json-tree-node {
+  margin: 0;
+}
+
+.json-tree-node--compact {
+  padding: 2px 0;
+  line-height: 1.8;
+}
+
+.json-tree-node__header {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 0;
+  line-height: 1.8;
+}
+
+.json-tree-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  margin-right: 4px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: color 160ms ease;
+}
+
+.json-tree-toggle:hover {
+  color: var(--accent-strong);
+}
+
+.json-tree-toggle--expanded {
+  color: var(--accent-strong);
+}
+
+.json-tree-node__children {
+  margin-left: 0;
+}
+
+.json-tree-child {
+  display: flex;
+  align-items: flex-start;
+}
+
+.json-tree-child .json-comma {
+  color: #cbd5e1;
+  margin-left: 2px;
+}
+
+.json-tree-node__close {
+  padding: 2px 0;
+  line-height: 1.8;
+}
+
+.json-key {
+  color: #fb7185;
+  font-weight: 600;
+}
+
+.json-colon {
+  color: #cbd5e1;
+}
+
+.json-bracket {
+  color: #cbd5e1;
+  font-weight: 600;
+}
+
+.json-collapsed-indicator {
+  color: var(--muted);
+  margin: 0 4px;
+  font-weight: 700;
+}
+
+.json-value {
+  font-weight: 500;
+}
+
+.json-value.json-string {
+  color: #34d399;
+}
+
+.json-value.json-number {
+  color: #fbbf24;
+}
+
+.json-value.json-boolean {
+  color: #60a5fa;
+}
+
+.json-value.json-null {
+  color: #60a5fa;
+}
+
 .token.sql-keyword,
 .token.json-literal {
   color: #60a5fa;
@@ -509,6 +623,31 @@ textarea:focus {
   .timestamp-grid {
     justify-content: flex-start;
   }
+}
+
+:root[data-theme='day'] .json-key {
+  color: #dc2626;
+}
+
+:root[data-theme='day'] .json-value.json-string {
+  color: #059669;
+}
+
+:root[data-theme='day'] .json-value.json-number {
+  color: #d97706;
+}
+
+:root[data-theme='day'] .json-value.json-boolean,
+:root[data-theme='day'] .json-value.json-null {
+  color: #2563eb;
+}
+
+:root[data-theme='day'] .json-tree-toggle:hover {
+  color: #0ea5e9;
+}
+
+:root[data-theme='day'] .json-tree-toggle--expanded {
+  color: #0ea5e9;
 }
 
 @media (max-width: 640px) {
